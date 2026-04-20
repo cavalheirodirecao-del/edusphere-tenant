@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/accordion";
 import { toast } from "@/hooks/use-toast";
 import {
-  BookOpen, Plus, Trash2, Loader2, FolderOpen, Layers, Play, FileVideo,
+  BookOpen, Plus, Trash2, Loader2, FolderOpen, Layers, Play, FileVideo, Download, Lock,
 } from "lucide-react";
 
 interface Lesson { id: string; title: string; video_url: string; position: number }
@@ -84,14 +84,24 @@ export default function ContentManager() {
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="font-display text-3xl font-semibold">Gestão de conteúdo</h1>
-            <p className="text-sm text-muted-foreground">Módulos → Temas → Aulas</p>
+            <p className="text-sm text-muted-foreground">
+              {profile?.tenant_is_catalog
+                ? "Catálogo público · cursos disponíveis para outras empresas importarem"
+                : "Módulos → Temas → Aulas"}
+            </p>
           </div>
-          <NewModuleDialog
-            tenantId={profile!.tenant_id}
-            createdBy={user!.id}
-            nextPosition={modules.length}
-            onCreated={load}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            {!profile?.tenant_is_catalog && (
+              <ImportCourseDialog onImported={load} />
+            )}
+            <NewModuleDialog
+              tenantId={profile!.tenant_id}
+              createdBy={user!.id}
+              nextPosition={modules.length}
+              isCatalog={!!profile?.tenant_is_catalog}
+              onCreated={load}
+            />
+          </div>
         </div>
 
         {loading ? (

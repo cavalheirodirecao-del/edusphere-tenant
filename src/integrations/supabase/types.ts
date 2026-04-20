@@ -21,6 +21,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          position: number
           tenant_id: string
           title: string
           updated_at: string
@@ -31,6 +32,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          position?: number
           tenant_id: string
           title: string
           updated_at?: string
@@ -41,6 +43,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          position?: number
           tenant_id?: string
           title?: string
           updated_at?: string
@@ -60,19 +63,25 @@ export type Database = {
           completed_at: string
           id: string
           lesson_id: string
+          updated_at: string
           user_id: string
+          watched_seconds: number
         }
         Insert: {
           completed_at?: string
           id?: string
           lesson_id: string
+          updated_at?: string
           user_id: string
+          watched_seconds?: number
         }
         Update: {
           completed_at?: string
           id?: string
           lesson_id?: string
+          updated_at?: string
           user_id?: string
+          watched_seconds?: number
         }
         Relationships: [
           {
@@ -91,6 +100,7 @@ export type Database = {
           description: string | null
           id: string
           position: number
+          theme_id: string
           title: string
           video_url: string
         }
@@ -100,6 +110,7 @@ export type Database = {
           description?: string | null
           id?: string
           position?: number
+          theme_id: string
           title: string
           video_url: string
         }
@@ -109,6 +120,7 @@ export type Database = {
           description?: string | null
           id?: string
           position?: number
+          theme_id?: string
           title?: string
           video_url?: string
         }
@@ -120,6 +132,13 @@ export type Database = {
             referencedRelation: "courses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "lessons_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "themes"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profiles: {
@@ -127,6 +146,8 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          is_active: boolean
+          store: string | null
           tenant_id: string
           username: string
         }
@@ -134,6 +155,8 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          is_active?: boolean
+          store?: string | null
           tenant_id: string
           username: string
         }
@@ -141,6 +164,8 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          is_active?: boolean
+          store?: string | null
           tenant_id?: string
           username?: string
         }
@@ -158,22 +183,57 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          logo_url: string | null
           name: string
           slug: string
         }
         Insert: {
           created_at?: string
           id?: string
+          logo_url?: string | null
           name: string
           slug: string
         }
         Update: {
           created_at?: string
           id?: string
+          logo_url?: string | null
           name?: string
           slug?: string
         }
         Relationships: []
+      }
+      themes: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          position: number
+          title: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          position?: number
+          title: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          position?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "themes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

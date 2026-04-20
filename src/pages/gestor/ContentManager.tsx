@@ -141,7 +141,12 @@ export default function ContentManager() {
                             <span className="text-xs text-muted-foreground">({t.lessons.length} aulas)</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <NewLessonDialog themeId={t.id} nextPosition={t.lessons.length} onCreated={load} />
+                            <NewLessonDialog
+                              themeId={t.id}
+                              courseId={m.id}
+                              nextPosition={t.lessons.length}
+                              onCreated={load}
+                            />
                             <Button variant="ghost" size="icon" onClick={() => removeTheme(t.id)} className="text-destructive hover:bg-destructive/10">
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -239,7 +244,7 @@ function NewThemeDialog({ moduleId, nextPosition, onCreated }: { moduleId: strin
   );
 }
 
-function NewLessonDialog({ themeId, nextPosition, onCreated }: { themeId: string; nextPosition: number; onCreated: () => void }) {
+function NewLessonDialog({ themeId, courseId, nextPosition, onCreated }: { themeId: string; courseId: string; nextPosition: number; onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
@@ -255,6 +260,7 @@ function NewLessonDialog({ themeId, nextPosition, onCreated }: { themeId: string
     setSaving(true);
     const { error } = await supabase.from("lessons").insert({
       theme_id: themeId,
+      course_id: courseId,
       title: title.trim(),
       video_url: videoUrl.trim(),
       position: nextPosition,

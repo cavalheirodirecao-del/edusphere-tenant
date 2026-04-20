@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { buildSyntheticEmail, SLUG_RE, USERNAME_RE } from "@/lib/auth-helpers";
 import { toast } from "@/hooks/use-toast";
-import { GraduationCap, Loader2, Sparkles } from "lucide-react";
+import { Crown, Loader2, Sparkles } from "lucide-react";
 
 const schema = z.object({
   slug: z.string().trim().toLowerCase().regex(SLUG_RE, "Identificador inválido"),
@@ -62,13 +62,13 @@ export default function Login() {
       <div className="w-full max-w-md animate-fade-in">
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow animate-glow-pulse">
-            <GraduationCap className="h-7 w-7 text-primary-foreground" />
+            <Crown className="h-7 w-7 text-primary-foreground" />
           </div>
           <h1 className="font-display text-3xl font-semibold">
-            <span className="gradient-text">Plataforma EAD</span>
+            Cavalheiro <span className="gradient-text">Academy</span>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Acesse com as credenciais da sua empresa
+            Acesse o portal de educação corporativa
           </p>
         </div>
 
@@ -89,7 +89,7 @@ export default function Login() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="username">Usuário</Label>
+              <Label htmlFor="username">Usuário (login)</Label>
               <Input
                 id="username"
                 placeholder="seu.usuario"

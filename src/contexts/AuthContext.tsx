@@ -9,6 +9,8 @@ interface ProfileInfo {
   tenant_id: string;
   username: string;
   full_name: string | null;
+  store: string | null;
+  is_active: boolean;
   tenant_slug: string;
   tenant_name: string;
 }
@@ -36,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [{ data: prof }, { data: roleRow }] = await Promise.all([
       supabase
         .from("profiles")
-        .select("id, tenant_id, username, full_name, tenants:tenant_id(slug, name)")
+        .select("id, tenant_id, username, full_name, store, is_active, tenants:tenant_id(slug, name)")
         .eq("id", uid)
         .maybeSingle(),
       supabase
@@ -53,6 +55,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         tenant_id: prof.tenant_id,
         username: prof.username,
         full_name: prof.full_name,
+        store: (prof as { store: string | null }).store,
+        is_active: (prof as { is_active: boolean }).is_active,
         tenant_slug: t.slug,
         tenant_name: t.name,
       });

@@ -323,3 +323,76 @@ function NewLessonDialog({ themeId, courseId, nextPosition, onCreated }: { theme
     </Dialog>
   );
 }
+
+function ImportCourseDialog({ onImported }: { onImported: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [courseTitle, setCourseTitle] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
+    if (!courseTitle.trim() || !password.trim()) {
+      return toast({ title: "Preencha nome do curso e senha", variant: "destructive" });
+    }
+    setLoading(true);
+    const { data, error } = await supabase.functions.invoke("import-catalog-course", {
+      body: { course_title: courseTitle.trim(), password: password.trim() },
+    });
+    setLoading(false);
+    const errMsg = (data as { error?: string })?.error || error?.message;
+    if (errMsg) {
+      return toast({ title: "Não foi possível importar", description: errMsg, variant: "destructive" });
+    }
+    const d = data as { themes: number; lessons: number; title: string };
+    toast({
+      title: "Curso importado!",
+      description: `${d.title} · ${d.themes} temas · ${d.lessons} aulas`,
+    });
+    setCourseTitle(""); setPassword(""); setOpen(false);
+    onImported();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="glow"><Download className="h-4 w-4" /> Importar curso padrão</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Download className="h-5 w-5 text-primary" /> Importar curso do catálogo
+          </DialogTitle>
+          <DialogDescription>
+            Informe o nome exato do curso e a senha que você recebeu.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Nome do curso</Label>
+            <Input
+              value={courseTitle}
+              onChange={(e) => setCourseTitle(e.target.value)}
+              placeholder="ex: Vendas Essenciais"
+              maxLength={120}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Senha de importação</Label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              maxLength={60}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button variant="hero" onClick={submit} disabled={loading}>
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}Importar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

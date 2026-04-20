@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/accordion";
 import { toast } from "@/hooks/use-toast";
 import {
-  BookOpen, Plus, Trash2, Loader2, FolderOpen, Layers, Play, FileVideo,
+  BookOpen, Plus, Trash2, Loader2, FolderOpen, Layers, Play, FileVideo, Download, Lock,
 } from "lucide-react";
 
 interface Lesson { id: string; title: string; video_url: string; position: number }
@@ -84,14 +84,24 @@ export default function ContentManager() {
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="font-display text-3xl font-semibold">Gestão de conteúdo</h1>
-            <p className="text-sm text-muted-foreground">Módulos → Temas → Aulas</p>
+            <p className="text-sm text-muted-foreground">
+              {profile?.tenant_is_catalog
+                ? "Catálogo público · cursos disponíveis para outras empresas importarem"
+                : "Módulos → Temas → Aulas"}
+            </p>
           </div>
-          <NewModuleDialog
-            tenantId={profile!.tenant_id}
-            createdBy={user!.id}
-            nextPosition={modules.length}
-            onCreated={load}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            {!profile?.tenant_is_catalog && (
+              <ImportCourseDialog onImported={load} />
+            )}
+            <NewModuleDialog
+              tenantId={profile!.tenant_id}
+              createdBy={user!.id}
+              nextPosition={modules.length}
+              isCatalog={!!profile?.tenant_is_catalog}
+              onCreated={load}
+            />
+          </div>
         </div>
 
         {loading ? (
@@ -180,13 +190,17 @@ export default function ContentManager() {
   );
 }
 
-function NewModuleDialog({ tenantId, createdBy, nextPosition, onCreated }: { tenantId: string; createdBy: string; nextPosition: number; onCreated: () => void }) {
+function NewModuleDialog({ tenantId, createdBy, nextPosition, isCatalog, onCreated }: { tenantId: string; createdBy: string; nextPosition: number; isCatalog: boolean; onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [importPassword, setImportPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const submit = async () => {
     if (title.trim().length < 2) return toast({ title: "Título obrigatório", variant: "destructive" });
+    if (isCatalog && importPassword.trim().length < 4) {
+      return toast({ title: "Defina uma senha de importação (mín. 4 caracteres)", variant: "destructive" });
+    }
     setSaving(true);
     const { error } = await supabase.from("courses").insert({
       tenant_id: tenantId,
@@ -194,10 +208,11 @@ function NewModuleDialog({ tenantId, createdBy, nextPosition, onCreated }: { ten
       title: title.trim(),
       description: description.trim() || null,
       position: nextPosition,
+      import_password: isCatalog ? importPassword.trim() : null,
     });
     setSaving(false);
     if (error) return toast({ title: "Erro", description: error.message, variant: "destructive" });
-    setTitle(""); setDescription(""); setOpen(false); onCreated();
+    setTitle(""); setDescription(""); setImportPassword(""); setOpen(false); onCreated();
   };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -207,6 +222,20 @@ function NewModuleDialog({ tenantId, createdBy, nextPosition, onCreated }: { ten
         <div className="space-y-4">
           <div className="space-y-2"><Label>Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} /></div>
           <div className="space-y-2"><Label>Descrição</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={500} /></div>
+          {isCatalog && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-primary" /> Senha de importação</Label>
+              <Input
+                value={importPassword}
+                onChange={(e) => setImportPassword(e.target.value)}
+                placeholder="ex: VENDAS-2026"
+                maxLength={60}
+              />
+              <p className="text-xs text-muted-foreground">
+                Empresas usarão o título do curso + esta senha para importar.
+              </p>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
@@ -289,6 +318,79 @@ function NewLessonDialog({ themeId, courseId, nextPosition, onCreated }: { theme
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
           <Button variant="hero" onClick={submit} disabled={saving}>{saving && <Loader2 className="h-4 w-4 animate-spin" />}Adicionar</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ImportCourseDialog({ onImported }: { onImported: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [courseTitle, setCourseTitle] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
+    if (!courseTitle.trim() || !password.trim()) {
+      return toast({ title: "Preencha nome do curso e senha", variant: "destructive" });
+    }
+    setLoading(true);
+    const { data, error } = await supabase.functions.invoke("import-catalog-course", {
+      body: { course_title: courseTitle.trim(), password: password.trim() },
+    });
+    setLoading(false);
+    const errMsg = (data as { error?: string })?.error || error?.message;
+    if (errMsg) {
+      return toast({ title: "Não foi possível importar", description: errMsg, variant: "destructive" });
+    }
+    const d = data as { themes: number; lessons: number; title: string };
+    toast({
+      title: "Curso importado!",
+      description: `${d.title} · ${d.themes} temas · ${d.lessons} aulas`,
+    });
+    setCourseTitle(""); setPassword(""); setOpen(false);
+    onImported();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="glow"><Download className="h-4 w-4" /> Importar curso padrão</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Download className="h-5 w-5 text-primary" /> Importar curso do catálogo
+          </DialogTitle>
+          <DialogDescription>
+            Informe o nome exato do curso e a senha que você recebeu.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Nome do curso</Label>
+            <Input
+              value={courseTitle}
+              onChange={(e) => setCourseTitle(e.target.value)}
+              placeholder="ex: Vendas Essenciais"
+              maxLength={120}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Senha de importação</Label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              maxLength={60}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button variant="hero" onClick={submit} disabled={loading}>
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}Importar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

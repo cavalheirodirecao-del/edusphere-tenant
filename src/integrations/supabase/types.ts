@@ -21,6 +21,8 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          import_password: string | null
+          imported_from_course_id: string | null
           position: number
           tenant_id: string
           title: string
@@ -32,6 +34,8 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          import_password?: string | null
+          imported_from_course_id?: string | null
           position?: number
           tenant_id: string
           title: string
@@ -43,6 +47,8 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          import_password?: string | null
+          imported_from_course_id?: string | null
           position?: number
           tenant_id?: string
           title?: string
@@ -183,6 +189,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_catalog: boolean
           logo_url: string | null
           name: string
           slug: string
@@ -190,6 +197,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_catalog?: boolean
           logo_url?: string | null
           name: string
           slug: string
@@ -197,6 +205,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_catalog?: boolean
           logo_url?: string | null
           name?: string
           slug?: string

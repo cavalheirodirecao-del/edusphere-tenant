@@ -190,13 +190,17 @@ export default function ContentManager() {
   );
 }
 
-function NewModuleDialog({ tenantId, createdBy, nextPosition, onCreated }: { tenantId: string; createdBy: string; nextPosition: number; onCreated: () => void }) {
+function NewModuleDialog({ tenantId, createdBy, nextPosition, isCatalog, onCreated }: { tenantId: string; createdBy: string; nextPosition: number; isCatalog: boolean; onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [importPassword, setImportPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const submit = async () => {
     if (title.trim().length < 2) return toast({ title: "Título obrigatório", variant: "destructive" });
+    if (isCatalog && importPassword.trim().length < 4) {
+      return toast({ title: "Defina uma senha de importação (mín. 4 caracteres)", variant: "destructive" });
+    }
     setSaving(true);
     const { error } = await supabase.from("courses").insert({
       tenant_id: tenantId,
@@ -204,10 +208,11 @@ function NewModuleDialog({ tenantId, createdBy, nextPosition, onCreated }: { ten
       title: title.trim(),
       description: description.trim() || null,
       position: nextPosition,
+      import_password: isCatalog ? importPassword.trim() : null,
     });
     setSaving(false);
     if (error) return toast({ title: "Erro", description: error.message, variant: "destructive" });
-    setTitle(""); setDescription(""); setOpen(false); onCreated();
+    setTitle(""); setDescription(""); setImportPassword(""); setOpen(false); onCreated();
   };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -217,6 +222,20 @@ function NewModuleDialog({ tenantId, createdBy, nextPosition, onCreated }: { ten
         <div className="space-y-4">
           <div className="space-y-2"><Label>Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} /></div>
           <div className="space-y-2"><Label>Descrição</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={500} /></div>
+          {isCatalog && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-primary" /> Senha de importação</Label>
+              <Input
+                value={importPassword}
+                onChange={(e) => setImportPassword(e.target.value)}
+                placeholder="ex: VENDAS-2026"
+                maxLength={60}
+              />
+              <p className="text-xs text-muted-foreground">
+                Empresas usarão o título do curso + esta senha para importar.
+              </p>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>

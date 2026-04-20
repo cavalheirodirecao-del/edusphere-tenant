@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [{ data: prof }, { data: roleRow }] = await Promise.all([
       supabase
         .from("profiles")
-        .select("id, tenant_id, username, full_name, store, is_active, tenants:tenant_id(slug, name)")
+        .select("id, tenant_id, username, full_name, store, is_active, tenants:tenant_id(slug, name, is_catalog)")
         .eq("id", uid)
         .maybeSingle(),
       supabase
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ]);
 
     if (prof && prof.tenants) {
-      const t = prof.tenants as unknown as { slug: string; name: string };
+      const t = prof.tenants as unknown as { slug: string; name: string; is_catalog: boolean };
       setProfile({
         id: prof.id,
         tenant_id: prof.tenant_id,
@@ -60,6 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         is_active: (prof as { is_active: boolean }).is_active,
         tenant_slug: t.slug,
         tenant_name: t.name,
+        tenant_is_catalog: !!t.is_catalog,
       });
     } else {
       setProfile(null);

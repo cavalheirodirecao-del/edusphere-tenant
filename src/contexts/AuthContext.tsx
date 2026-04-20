@@ -13,6 +13,7 @@ interface ProfileInfo {
   is_active: boolean;
   tenant_slug: string;
   tenant_name: string;
+  tenant_is_catalog: boolean;
 }
 
 interface AuthCtx {

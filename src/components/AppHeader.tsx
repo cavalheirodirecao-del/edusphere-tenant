@@ -16,7 +16,7 @@ export function AppHeader({ title }: { title?: string }) {
           </div>
           <div>
             <p className="font-display text-base font-semibold leading-tight">
-              Cavalheiro <span className="gradient-text">Academy</span>
+              Academia <span className="gradient-text">Corporativa</span>
             </p>
             <p className="text-xs text-muted-foreground">
               {title ? `${title} · ` : ""}{profile?.tenant_name} · {role === "gestor" ? "Gestor" : "Aluno"}

@@ -67,7 +67,7 @@ export default function AlunoDashboardNew() {
         <div className="mb-8">
           <p className="text-sm text-muted-foreground">Olá, {profile?.full_name || profile?.username}</p>
           <h1 className="font-display text-3xl font-semibold">
-            Sua jornada na <span className="gradient-text">Cavalheiro Academy</span>
+            Sua jornada na <span className="gradient-text">Academia Corporativa</span>
           </h1>
         </div>
 

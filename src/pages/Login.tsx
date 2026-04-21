@@ -65,7 +65,7 @@ export default function Login() {
             <Crown className="h-7 w-7 text-primary-foreground" />
           </div>
           <h1 className="font-display text-3xl font-semibold">
-            Cavalheiro <span className="gradient-text">Academy</span>
+            Academia <span className="gradient-text">Corporativa</span>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Acesse o portal de educação corporativa

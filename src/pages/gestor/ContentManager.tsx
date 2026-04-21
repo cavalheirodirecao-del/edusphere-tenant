@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/accordion";
 import { toast } from "@/hooks/use-toast";
 import {
-  BookOpen, Plus, Trash2, Loader2, FolderOpen, Layers, Play, FileVideo, Download, Lock,
+  BookOpen, Plus, Trash2, Loader2, FolderOpen, Layers, Play, FileVideo, Download, Lock, Pencil,
 } from "lucide-react";
 
 interface Lesson { id: string; title: string; video_url: string; position: number }
@@ -133,6 +133,7 @@ export default function ContentManager() {
                       </div>
                     </div>
                   </AccordionTrigger>
+                  <EditModuleDialog module={m} onSaved={load} />
                   <Button variant="ghost" size="icon" onClick={() => removeModule(m.id)} className="text-destructive hover:bg-destructive/10">
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -157,6 +158,7 @@ export default function ContentManager() {
                               nextPosition={t.lessons.length}
                               onCreated={load}
                             />
+                            <EditThemeDialog theme={t} onSaved={load} />
                             <Button variant="ghost" size="icon" onClick={() => removeTheme(t.id)} className="text-destructive hover:bg-destructive/10">
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -168,7 +170,8 @@ export default function ContentManager() {
                               <li key={l.id} className="flex items-center gap-3 rounded-lg px-2 py-1.5 text-sm hover:bg-secondary/40">
                                 <Play className="h-3.5 w-3.5 text-primary shrink-0" />
                                 <span className="min-w-0 flex-1 truncate">{i + 1}. {l.title}</span>
-                                <span className="hidden truncate text-xs text-muted-foreground sm:inline max-w-[260px]">{l.video_url}</span>
+                                <span className="hidden truncate text-xs text-muted-foreground sm:inline max-w-[200px]">{l.video_url}</span>
+                                <EditLessonDialog lesson={l} onSaved={load} />
                                 <Button variant="ghost" size="icon" onClick={() => removeLesson(l.id)} className="h-7 w-7 text-destructive hover:bg-destructive/10">
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </Button>
@@ -318,6 +321,111 @@ function NewLessonDialog({ themeId, courseId, nextPosition, onCreated }: { theme
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
           <Button variant="hero" onClick={submit} disabled={saving}>{saving && <Loader2 className="h-4 w-4 animate-spin" />}Adicionar</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function EditModuleDialog({ module, onSaved }: { module: Module; onSaved: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState(module.title);
+  const [description, setDescription] = useState(module.description ?? "");
+  const [saving, setSaving] = useState(false);
+  const submit = async () => {
+    if (title.trim().length < 2) return toast({ title: "Título obrigatório", variant: "destructive" });
+    setSaving(true);
+    const { error } = await supabase.from("courses").update({ title: title.trim(), description: description.trim() || null }).eq("id", module.id);
+    setSaving(false);
+    if (error) return toast({ title: "Erro", description: error.message, variant: "destructive" });
+    setOpen(false); onSaved();
+  };
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (v) { setTitle(module.title); setDescription(module.description ?? ""); } setOpen(v); }}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary"><Pencil className="h-4 w-4" /></Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Editar módulo</DialogTitle></DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2"><Label>Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} /></div>
+          <div className="space-y-2"><Label>Descrição</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={500} /></div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button variant="hero" onClick={submit} disabled={saving}>{saving && <Loader2 className="h-4 w-4 animate-spin" />}Salvar</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function EditThemeDialog({ theme, onSaved }: { theme: Theme; onSaved: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState(theme.title);
+  const [saving, setSaving] = useState(false);
+  const submit = async () => {
+    if (title.trim().length < 2) return toast({ title: "Título obrigatório", variant: "destructive" });
+    setSaving(true);
+    const { error } = await supabase.from("themes").update({ title: title.trim() }).eq("id", theme.id);
+    setSaving(false);
+    if (error) return toast({ title: "Erro", description: error.message, variant: "destructive" });
+    setOpen(false); onSaved();
+  };
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (v) setTitle(theme.title); setOpen(v); }}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary"><Pencil className="h-3.5 w-3.5" /></Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Editar tema</DialogTitle></DialogHeader>
+        <div className="space-y-2"><Label>Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} /></div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button variant="hero" onClick={submit} disabled={saving}>{saving && <Loader2 className="h-4 w-4 animate-spin" />}Salvar</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function EditLessonDialog({ lesson, onSaved }: { lesson: Lesson; onSaved: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState(lesson.title);
+  const [videoUrl, setVideoUrl] = useState(lesson.video_url);
+  const [saving, setSaving] = useState(false);
+  const submit = async () => {
+    if (title.trim().length < 2 || !videoUrl.trim()) return toast({ title: "Preencha título e URL", variant: "destructive" });
+    try { new URL(videoUrl); } catch { return toast({ title: "URL inválida", variant: "destructive" }); }
+    if (!VIDEO_EXT_RE.test(videoUrl.trim())) {
+      const ok = confirm("A URL não termina em .mp4/.webm/.mov. O player HTML5 pode não conseguir reproduzir. Deseja salvar mesmo assim?");
+      if (!ok) return;
+    }
+    setSaving(true);
+    const { error } = await supabase.from("lessons").update({ title: title.trim(), video_url: videoUrl.trim() }).eq("id", lesson.id);
+    setSaving(false);
+    if (error) return toast({ title: "Erro", description: error.message, variant: "destructive" });
+    setOpen(false); onSaved();
+  };
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (v) { setTitle(lesson.title); setVideoUrl(lesson.video_url); } setOpen(v); }}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary"><Pencil className="h-3.5 w-3.5" /></Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><FileVideo className="h-5 w-5 text-primary" /> Editar aula</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2"><Label>Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} /></div>
+          <div className="space-y-2">
+            <Label>URL do vídeo (.mp4)</Label>
+            <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://..." />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button variant="hero" onClick={submit} disabled={saving}>{saving && <Loader2 className="h-4 w-4 animate-spin" />}Salvar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

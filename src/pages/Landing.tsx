@@ -1,4 +1,40 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+const WORDS = ["vendas", "contabilidade", "gestão", "marketing", "atendimento", "liderança", "operações"];
+
+function AnimatedWord() {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const interval = setInterval(() => {
+        setVisible(false);
+        setTimeout(() => {
+          setIndex((i) => (i + 1) % WORDS.length);
+          setVisible(true);
+        }, 300);
+      }, 2500);
+      return () => clearInterval(interval);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <span
+      className="text-primary glow-text inline-block"
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(6px)",
+        transition: "opacity 0.3s ease, transform 0.3s ease",
+        minWidth: "10ch",
+      }}
+    >
+      {WORDS[index]}
+    </span>
+  );
+}
 import { Button } from "@/components/ui/button";
 import {
   Crown, Users, BookOpen, TrendingUp, CheckCircle2, Award, BarChart3,
@@ -47,7 +83,7 @@ export default function Landing() {
             <Zap className="h-3.5 w-3.5" /> Treinamento profissional para sua equipe
           </div>
           <h1 className="font-display mx-auto max-w-3xl text-5xl font-bold leading-tight md:text-6xl">
-            Eleve o padrão da sua <span className="text-primary glow-text">equipe de vendas</span>
+            Eleve o padrão da sua <span className="text-primary glow-text">equipe de </span><AnimatedWord />
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
             Treine todos os seus funcionários com o mesmo conteúdo, acompanhe o progresso de cada um e garanta um atendimento padronizado em todas as suas lojas.

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, UserPlus, UserCheck, UserX, Search } from "lucide-react";
+import { Loader2, UserPlus, UserCheck, UserX, Search, KeyRound } from "lucide-react";
 
 interface Student {
   id: string;
@@ -126,7 +126,8 @@ export default function StudentsManager() {
                         <Badge variant="secondary" className="text-muted-foreground">Inativo</Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right flex items-center justify-end gap-1">
+                      <ResetPasswordDialog student={s} />
                       <Button variant="ghost" size="sm" onClick={() => toggle(s)}>
                         {s.is_active ? <><UserX className="h-4 w-4" /> Desativar</> : <><UserCheck className="h-4 w-4" /> Reativar</>}
                       </Button>
@@ -139,6 +140,49 @@ export default function StudentsManager() {
         </div>
       </main>
     </div>
+  );
+}
+
+function ResetPasswordDialog({ student }: { student: Student }) {
+  const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const submit = async () => {
+    if (password.length < 8) return toast({ title: "Senha deve ter ao menos 8 caracteres", variant: "destructive" });
+    setSaving(true);
+    const { data, error } = await supabase.functions.invoke("reset-student-password", {
+      body: { user_id: student.id, new_password: password },
+    });
+    setSaving(false);
+    const errMsg = (data as { error?: string })?.error || error?.message;
+    if (errMsg) return toast({ title: "Erro ao redefinir senha", description: errMsg, variant: "destructive" });
+    toast({ title: "Senha redefinida", description: `Nova senha definida para @${student.username}` });
+    setPassword(""); setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { setPassword(""); setOpen(v); }}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
+          <KeyRound className="h-4 w-4" /> Senha
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Redefinir senha</DialogTitle>
+          <DialogDescription>Definir nova senha para <strong>@{student.username}</strong> ({student.full_name})</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label>Nova senha (mín. 8 caracteres)</Label>
+          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoFocus />
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button variant="hero" onClick={submit} disabled={saving}>{saving && <Loader2 className="h-4 w-4 animate-spin" />}Salvar</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

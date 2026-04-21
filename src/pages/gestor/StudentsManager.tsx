@@ -212,11 +212,11 @@ function NewStudentDialog({ onCreated }: { onCreated: () => void }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="hero"><UserPlus className="h-4 w-4" /> Cadastrar funcionário</Button>
+        <Button variant="hero"><UserPlus className="h-4 w-4" /> Cadastrar aluno</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Novo funcionário</DialogTitle>
+          <DialogTitle>Novo aluno</DialogTitle>
           <DialogDescription>Login: <strong>{profile?.tenant_slug}</strong> / usuário / senha</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">

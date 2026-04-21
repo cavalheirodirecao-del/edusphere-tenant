@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Setup from "./pages/Setup";
 import GestorDashboardNew from "./pages/gestor/GestorDashboardNew";
@@ -26,7 +27,8 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Login />} />
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/setup" element={<Setup />} />
             <Route path="/gestor" element={<ProtectedRoute requiredRole="gestor"><GestorDashboardNew /></ProtectedRoute>} />
             <Route path="/gestor/dashboard" element={<ProtectedRoute requiredRole="gestor"><GestorDashboardNew /></ProtectedRoute>} />

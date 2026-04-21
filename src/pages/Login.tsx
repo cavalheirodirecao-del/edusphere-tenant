@@ -129,7 +129,7 @@ export default function Login() {
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
           Primeira vez por aqui?{" "}
-          <Link to="/setup" className="text-primary hover:underline">
+          <Link to="/" className="text-primary hover:underline">
             Cadastrar nova empresa
           </Link>
         </p>

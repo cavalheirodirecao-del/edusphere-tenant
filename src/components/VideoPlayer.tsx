@@ -17,13 +17,35 @@ interface Props {
   initialSeconds?: number;
 }
 
+/** Detecta se a URL é um embed (iframe) — Bunny Stream, YouTube, Vimeo, etc. */
+function isIframeUrl(url: string) {
+  return /(?:iframe\.mediadelivery\.net|player\.mediadelivery\.net|youtube\.com\/embed|youtu\.be|vimeo\.com\/video|player\.vimeo\.com)/i.test(
+    url,
+  );
+}
+
+/** Converte URLs do Bunny Stream para o formato de embed correto. */
+function toBunnyEmbed(url: string) {
+  // https://player.mediadelivery.net/play/{lib}/{video} -> https://iframe.mediadelivery.net/embed/{lib}/{video}
+  const m = url.match(/mediadelivery\.net\/(?:play|embed)\/(\d+)\/([a-f0-9-]+)/i);
+  if (m) {
+    const [, lib, video] = m;
+    return `https://iframe.mediadelivery.net/embed/${lib}/${video}?autoplay=false&preload=true&responsive=true`;
+  }
+  return url;
+}
+
 export function VideoPlayer({ url, onTimeUpdate, onEnded, initialSeconds }: Props) {
   const ref = useRef<HTMLVideoElement>(null);
   const [speed, setSpeed] = useState(1);
   const [error, setError] = useState(false);
   const lastReport = useRef(0);
 
+  const iframeMode = isIframeUrl(url);
+  const embedUrl = iframeMode ? toBunnyEmbed(url) : url;
+
   useEffect(() => {
+    if (iframeMode) return;
     setError(false);
     const v = ref.current;
     if (!v) return;
@@ -38,8 +60,23 @@ export function VideoPlayer({ url, onTimeUpdate, onEnded, initialSeconds }: Prop
   }, [url]);
 
   useEffect(() => {
-    if (ref.current) ref.current.playbackRate = speed;
+    if (!iframeMode && ref.current) ref.current.playbackRate = speed;
   }, [speed]);
+
+  if (iframeMode) {
+    return (
+      <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-border bg-black shadow-elegant">
+        <iframe
+          src={embedUrl}
+          loading="lazy"
+          title="Player de vídeo"
+          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          className="absolute inset-0 h-full w-full border-0"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">

@@ -10,6 +10,7 @@ import Setup from "./pages/Setup";
 import GestorDashboardNew from "./pages/gestor/GestorDashboardNew";
 import ContentManager from "./pages/gestor/ContentManager";
 import StudentsManager from "./pages/gestor/StudentsManager";
+import Matriculas from "./pages/gestor/Matriculas";
 import AlunoDashboardNew from "./pages/aluno/AlunoDashboardNew";
 import CursosBrowser from "./pages/aluno/CursosBrowser";
 import LessonPlayer from "./pages/aluno/LessonPlayer";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/gestor/dashboard" element={<ProtectedRoute requiredRole="gestor"><GestorDashboardNew /></ProtectedRoute>} />
             <Route path="/gestor/conteudo" element={<ProtectedRoute requiredRole="gestor"><ContentManager /></ProtectedRoute>} />
             <Route path="/gestor/alunos" element={<ProtectedRoute requiredRole="gestor"><StudentsManager /></ProtectedRoute>} />
+            <Route path="/gestor/matriculas" element={<ProtectedRoute requiredRole="gestor"><Matriculas /></ProtectedRoute>} />
             <Route path="/aluno" element={<ProtectedRoute requiredRole="aluno"><AlunoDashboardNew /></ProtectedRoute>} />
             <Route path="/aluno/dashboard" element={<ProtectedRoute requiredRole="aluno"><AlunoDashboardNew /></ProtectedRoute>} />
             <Route path="/aluno/cursos" element={<ProtectedRoute requiredRole="aluno"><CursosBrowser /></ProtectedRoute>} />

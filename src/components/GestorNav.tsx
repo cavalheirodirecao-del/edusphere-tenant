@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, BookOpen, Users } from "lucide-react";
+import { LayoutDashboard, BookOpen, Users, GraduationCap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function GestorNav() {
@@ -7,6 +7,7 @@ export function GestorNav() {
     { to: "/gestor/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/gestor/conteudo", label: "Conteúdo", icon: BookOpen },
     { to: "/gestor/alunos", label: "Alunos", icon: Users },
+    { to: "/gestor/matriculas", label: "Matrículas", icon: GraduationCap },
   ];
   return (
     <nav className="container flex gap-1 overflow-x-auto border-b border-border/60 py-2">

@@ -20,7 +20,7 @@ export default function Landing() {
               <Crown className="h-4 w-4 text-white" />
             </div>
             <span className="font-display text-lg font-bold">
-              Cavalheiro <span className="text-primary">Academy</span>
+              Academia <span className="text-primary">Corporativa</span>
             </span>
           </div>
           <nav className="hidden items-center gap-6 md:flex">
@@ -278,12 +278,23 @@ export default function Landing() {
                 </Button>
               </Link>
             </div>
-            <p className="mt-8 text-sm text-muted-foreground">
-              Dúvidas? Fale conosco:{" "}
-              <a href="mailto:midiascavalheiro@gmail.com" className="text-primary hover:underline">
-                midiascavalheiro@gmail.com
-              </a>
-            </p>
+            <div className="mt-8 space-y-1 text-sm text-muted-foreground">
+              <p>
+                Dúvidas? Fale conosco:{" "}
+                <a href="mailto:Wallysonfael@gmail.com" className="text-primary hover:underline">
+                  Wallysonfael@gmail.com
+                </a>
+              </p>
+              <p>
+                WhatsApp:{" "}
+                <a href="https://wa.me/5581998229477" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                  (81) 99822-9477
+                </a>
+              </p>
+              <p className="text-xs text-muted-foreground/60 mt-3">
+                Wallyson Henrique Silva Rafael Oliveira · CNPJ 52.869.788/0001-70
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -295,9 +306,9 @@ export default function Landing() {
             <div className="flex h-6 w-6 items-center justify-center rounded bg-primary">
               <Crown className="h-3 w-3 text-white" />
             </div>
-            <span className="text-sm font-semibold">Cavalheiro Academy</span>
+            <span className="text-sm font-semibold">Academia Corporativa</span>
           </div>
-          <p className="text-xs text-muted-foreground">© 2026 Cavalheiro Academy. Todos os direitos reservados.</p>
+          <p className="text-xs text-muted-foreground">© 2026 Academia Corporativa · CNPJ 52.869.788/0001-70</p>
           <Link to="/login" className="text-xs text-muted-foreground hover:text-primary">
             Acessar plataforma
           </Link>

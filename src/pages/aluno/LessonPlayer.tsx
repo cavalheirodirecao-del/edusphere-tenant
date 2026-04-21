@@ -141,16 +141,21 @@ export default function LessonPlayer() {
   return (
     <div className="min-h-screen">
       <AppHeader title="Aula" />
-      <main className="container py-8">
-        <Link to="/aluno/cursos" className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+      <main className="container max-w-5xl py-6 sm:py-10">
+        <Link
+          to="/aluno/cursos"
+          className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
           <ArrowLeft className="h-4 w-4" /> Voltar ao catálogo
         </Link>
 
-        <div className="mb-4">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
+        <div className="mb-5">
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-primary/80">
             {lesson.themes.courses.title} · {lesson.themes.title}
           </p>
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">{lesson.title}</h1>
+          <h1 className="mt-2 font-display text-2xl font-semibold leading-tight text-foreground sm:text-4xl">
+            {lesson.title}
+          </h1>
         </div>
 
         <VideoPlayer
@@ -160,12 +165,17 @@ export default function LessonPlayer() {
         />
 
         {lesson.description && (
-          <div className="surface-card mt-6 rounded-2xl p-5 text-sm text-muted-foreground">
-            {lesson.description}
+          <div className="surface-card mt-8 rounded-2xl p-6">
+            <h2 className="mb-2 font-display text-sm font-semibold uppercase tracking-wider text-foreground/90">
+              Sobre esta aula
+            </h2>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground sm:text-base">
+              {lesson.description}
+            </p>
           </div>
         )}
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
           <Button
             variant={completed ? "glow" : "hero"}
             onClick={toggleComplete}

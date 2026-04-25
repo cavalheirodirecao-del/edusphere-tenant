@@ -327,21 +327,31 @@ function NewLessonDialog({ themeId, courseId, nextPosition, onCreated }: { theme
   );
 }
 
-function EditModuleDialog({ module, onSaved }: { module: Module; onSaved: () => void }) {
+function EditModuleDialog({ module, isCatalog, onSaved }: { module: Module; isCatalog: boolean; onSaved: () => void }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(module.title);
   const [description, setDescription] = useState(module.description ?? "");
+  const [importPassword, setImportPassword] = useState(module.import_password ?? "");
+  const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
   const submit = async () => {
     if (title.trim().length < 2) return toast({ title: "Título obrigatório", variant: "destructive" });
+    if (isCatalog && importPassword.trim().length < 4) {
+      return toast({ title: "Senha de importação deve ter no mínimo 4 caracteres", variant: "destructive" });
+    }
     setSaving(true);
-    const { error } = await supabase.from("courses").update({ title: title.trim(), description: description.trim() || null }).eq("id", module.id);
+    const updates: { title: string; description: string | null; import_password?: string } = {
+      title: title.trim(),
+      description: description.trim() || null,
+    };
+    if (isCatalog) updates.import_password = importPassword.trim();
+    const { error } = await supabase.from("courses").update(updates).eq("id", module.id);
     setSaving(false);
     if (error) return toast({ title: "Erro", description: error.message, variant: "destructive" });
     setOpen(false); onSaved();
   };
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (v) { setTitle(module.title); setDescription(module.description ?? ""); } setOpen(v); }}>
+    <Dialog open={open} onOpenChange={(v) => { if (v) { setTitle(module.title); setDescription(module.description ?? ""); setImportPassword(module.import_password ?? ""); setShowPassword(false); } setOpen(v); }}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary"><Pencil className="h-4 w-4" /></Button>
       </DialogTrigger>
@@ -350,6 +360,26 @@ function EditModuleDialog({ module, onSaved }: { module: Module; onSaved: () => 
         <div className="space-y-4">
           <div className="space-y-2"><Label>Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} /></div>
           <div className="space-y-2"><Label>Descrição</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={500} /></div>
+          {isCatalog && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-primary" /> Senha de importação</Label>
+              <div className="flex gap-2">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={importPassword}
+                  onChange={(e) => setImportPassword(e.target.value)}
+                  placeholder="ex: VENDAS-2026"
+                  maxLength={60}
+                />
+                <Button type="button" variant="ghost" size="sm" onClick={() => setShowPassword((s) => !s)}>
+                  {showPassword ? "Ocultar" : "Mostrar"}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Empresas usarão o título do curso + esta senha para importar.
+              </p>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>

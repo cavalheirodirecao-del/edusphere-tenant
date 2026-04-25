@@ -29,7 +29,7 @@ import {
 
 interface Lesson { id: string; title: string; video_url: string; position: number }
 interface Theme { id: string; title: string; position: number; lessons: Lesson[] }
-interface Module { id: string; title: string; description: string | null; position: number; themes: Theme[] }
+interface Module { id: string; title: string; description: string | null; position: number; import_password: string | null; themes: Theme[] }
 
 const VIDEO_EXT_RE = /\.(mp4|webm|mov|m4v)(\?.*)?$/i;
 
@@ -42,7 +42,7 @@ export default function ContentManager() {
     setLoading(true);
     const { data, error } = await supabase
       .from("courses")
-      .select("id, title, description, position, themes(id, title, position, lessons(id, title, video_url, position))")
+      .select("id, title, description, position, import_password, themes(id, title, position, lessons(id, title, video_url, position))")
       .order("position", { ascending: true });
     if (error) toast({ title: "Erro", description: error.message, variant: "destructive" });
     const sorted = (data ?? []).map((m) => ({
@@ -133,7 +133,7 @@ export default function ContentManager() {
                       </div>
                     </div>
                   </AccordionTrigger>
-                  <EditModuleDialog module={m} onSaved={load} />
+                  <EditModuleDialog module={m} isCatalog={!!profile?.tenant_is_catalog} onSaved={load} />
                   <Button variant="ghost" size="icon" onClick={() => removeModule(m.id)} className="text-destructive hover:bg-destructive/10">
                     <Trash2 className="h-4 w-4" />
                   </Button>
